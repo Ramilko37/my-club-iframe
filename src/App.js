@@ -1,40 +1,41 @@
-import React from 'react';
 import {
+  Button,
   ChakraProvider,
-  Box,
-  Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
-  theme,
+  Flex,
+  theme
 } from '@chakra-ui/react';
-import { ColorModeSwitcher } from './ColorModeSwitcher';
-import { Logo } from './Logo';
+import React, { useEffect } from 'react';
+import { base64img } from './constant.js';
 
 function App() {
+
+  const handleBtnClick = () => { 
+    const iframeWindow = document.getElementById('iframe').contentWindow
+    iframeWindow.postMessage({ type: 'initialImage', payload: base64img}, '*')
+  }
+
+  useEffect(() => {
+    window.addEventListener('message', function (event) {
+      if(event.origin !== 'https://dev.myclub.asdf.superlook.ai/') {
+        return
+      }
+
+      this.localStorage.setItem('result', event.data)
+      let image = this.document.createElement('img')
+      image.width = '100vw'
+      image.height = '100vh'
+      image.src = event.data
+      this.document.body.appendChild(image)
+    })
+  }, [])
+
   return (
     <ChakraProvider theme={theme}>
-      <Box textAlign="center" fontSize="xl">
-        <Grid minH="100vh" p={3}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-          <VStack spacing={8}>
-            <Logo h="40vmin" pointerEvents="none" />
-            <Text>
-              Edit <Code fontSize="xl">src/App.js</Code> and save to reload.
-            </Text>
-            <Link
-              color="teal.500"
-              href="https://chakra-ui.com"
-              fontSize="2xl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn Chakra
-            </Link>
-          </VStack>
-        </Grid>
-      </Box>
+      <Flex w={'100%'} h={'100dvh'} textAlign="center" fontSize="xl">
+         <Button pos={'absolute'} top={'5%'} left={'50%'} transform={'translate(-50%, 0)'}  onClick={handleBtnClick}>Send Message</Button>  
+         <iframe style={{ width: '100%', height: '100%' }}  id='iframe' src='https://dev.myclub.asdf.superlook.ai/' />
+         
+      </Flex>
     </ChakraProvider>
   );
 }
